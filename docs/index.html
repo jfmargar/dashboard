@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Dashboard</title>
-<meta name="description" content="Una oficina en pixel art donde cada sesión de Codex y Claude Code de tu Mac es un personaje. Panel local en Node 24, sin dependencias.">
+<meta name="description" content="Todas tus sesiones de Claude Code y Codex, de un vistazo: una oficina en pixel art donde cada sesión de tu Mac es un personaje. Panel local en Node 24, sin dependencias.">
 <meta property="og:title" content="Dashboard: tus agentes de código en una oficina pixel art">
-<meta property="og:description" content="Ves qué sesión de Codex o Claude Code trabaja, cuál te espera y le contestas desde la tablet. Local, sin dependencias y solo en tu tailnet.">
+<meta property="og:description" content="Ves de un vistazo qué sesión de Codex o Claude Code trabaja, cuál te espera y cuál ha terminado. Local, sin dependencias y solo en tu tailnet.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://jfmargar.github.io/dashboard/">
 <meta property="og:image" content="https://jfmargar.github.io/dashboard/images/social.png">
@@ -181,7 +181,7 @@ footer { padding-block: 32px 48px; color: var(--dim); font-size: 13px; border-to
     <div class="stack" style="gap:22px">
       <span class="eyebrow">Código abierto · MIT · v0.6.1</span>
       <div class="hero-title"><img src="images/icon.png" width="60" height="60" alt=""><h1>Dash<span>board</span></h1></div>
-      <p class="lede">Una oficina en pixel art donde cada sesión de Codex y Claude Code de tu Mac es un personaje. Ves quién trabaja, quién te espera y le contestas desde la tablet o el móvil.</p>
+      <p class="lede">Todas tus sesiones de Claude Code y Codex, de un vistazo. Cada sesión de tu Mac es un personaje de una oficina en pixel art: sabes quién trabaja, quién te espera y quién ha terminado aunque no estés delante del ordenador.</p>
       <div class="cta">
         <a href="https://github.com/jfmargar/dashboard">Ver en GitHub</a>
         <a class="ghost" href="#instalar">Instalarlo</a>
@@ -287,8 +287,10 @@ footer { padding-block: 32px 48px; color: var(--dim); font-size: 13px; border-to
   <section class="wrap stack" style="gap:28px">
     <div class="prose stack">
       <span class="eyebrow">Ficha de sesión</span>
-      <h2>No solo mirar: contestar</h2>
-      <p>Al tocar un personaje se abre su ficha: el último encargo, la respuesta en curso en vivo y el historial. Desde ahí el Mac continúa la sesión en segundo plano con el CLI de su agente. Toda orden pasa por <b>Revisar</b> antes de enviarse.</p>
+      <h2>Seguir cada sesión y saltar a su app</h2>
+      <p>Al tocar un personaje se abre su ficha: el último encargo, la respuesta en curso en vivo y el historial.</p>
+      <p>Con las sesiones se trabaja en Codex y en Claude, como siempre. Dashboard no pretende sustituir a Codex en la app de ChatGPT ni a Remote Control de Claude: es una ayuda para tener la visión global sin estar delante del ordenador. Cuando una sesión te necesita, la ficha te lleva a ella en su app.</p>
+      <p>Si en algún momento te viene mejor, también puedes contestar desde el propio panel. El Mac continúa la sesión en segundo plano con el CLI de su agente, y toda orden pasa por <b>Revisar</b> antes de enviarse.</p>
     </div>
     <figure class="shot">
       <img src="images/ficha.webp" width="800" height="555" loading="lazy" alt="Ficha de la sesión Artículo sobre Tailscale abierta junto a la oficina: el encargo, la pregunta de Claude y el cuadro de respuesta con micrófono y botón Revisar">
@@ -296,9 +298,14 @@ footer { padding-block: 32px 48px; color: var(--dim); font-size: 13px; border-to
     </figure>
     <div class="actions">
       <div class="action">
+        <svg class="ico" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="2" width="5" height="5" fill="#69d2d9"/><rect x="1" y="3" width="3" height="3" fill="#12141d"/><rect x="4" y="0" width="4" height="1" fill="#69d2d9"/><rect x="7" y="0" width="1" height="4" fill="#69d2d9"/><rect x="5" y="2" width="1" height="1" fill="#69d2d9"/></svg>
+        <h3>Abrir en su app</h3>
+        <p>Para trabajar con una sesión, la ficha te lleva a su app: las de Claude, a Remote Control; las de Codex, a su app del Mac o a ChatGPT en el móvil.</p>
+      </div>
+      <div class="action">
         <svg class="ico" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="1" width="8" height="5" fill="#5b9cf0"/><rect x="2" y="6" width="2" height="2" fill="#5b9cf0"/><rect x="1" y="3" width="6" height="1" fill="#12141d"/></svg>
-        <h3>Contestar y dar indicaciones</h3>
-        <p>Envía una orden a la sesión o, con Codex trabajando, una indicación sobre la marcha sin pararla.</p>
+        <h3>Contestar si hace falta</h3>
+        <p>Envía una orden corta a la sesión o, con Codex trabajando, una indicación sobre la marcha sin pararla.</p>
       </div>
       <div class="action">
         <svg class="ico" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect x="1" y="4" width="2" height="2" fill="#6cc788"/><rect x="3" y="5" width="1" height="2" fill="#6cc788"/><rect x="4" y="3" width="1" height="3" fill="#6cc788"/><rect x="5" y="1" width="2" height="2" fill="#6cc788"/></svg>
@@ -315,11 +322,6 @@ footer { padding-block: 32px 48px; color: var(--dim); font-size: 13px; border-to
         <h3>Nueva sesión</h3>
         <p>Elige proyecto, agente y nivel de permisos, y el personaje entra por la puerta.</p>
         <div class="perm"><span>Auto</span><span>Editar</span><span>Solo mirar</span></div>
-      </div>
-      <div class="action">
-        <svg class="ico" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="2" width="5" height="5" fill="#69d2d9"/><rect x="1" y="3" width="3" height="3" fill="#12141d"/><rect x="4" y="0" width="4" height="1" fill="#69d2d9"/><rect x="7" y="0" width="1" height="4" fill="#69d2d9"/><rect x="5" y="2" width="1" height="1" fill="#69d2d9"/></svg>
-        <h3>Abrir en su app</h3>
-        <p>Las sesiones de la app de Claude se abren con Remote Control; las de Codex, en su app del Mac o en ChatGPT en el móvil.</p>
       </div>
       <div class="action">
         <svg class="ico" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="1" width="8" height="2" fill="#9da1b4"/><rect x="1" y="3" width="6" height="4" fill="#9da1b4"/><rect x="3" y="4" width="2" height="1" fill="#12141d"/></svg>
