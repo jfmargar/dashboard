@@ -1,0 +1,48 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dashboard",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "--watch",
+        "src/server.js"
+      ],
+      "port": 4317
+    },
+    {
+      "name": "dashboard-pruebas",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "PORT=4319",
+        "node",
+        "--watch",
+        "src/server.js"
+      ],
+      "port": 4319
+    },
+    {
+      "name": "dashboard-demo",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "D=\"$HOME/Library/Caches/dashboard-demo\" && node tests/fixtures/demo-world.js \"$D\" && exec env PORT=4320 HOME=\"$D/home\" DASHBOARD_DATA_DIR=\"$D/data\" CLAUDE_BIN=\"$D/no-existe\" CODEX_BIN=\"$D/no-existe\" GLAB_BIN=/usr/bin/false GH_BIN=/usr/bin/false DATASK_BIN=/usr/bin/false TRANSCRIBE_CMD=/usr/bin/true CLAUDE_USAGE_PROBE_MINUTES=0 INBOX_FOLLOW_UP_MINUTES=100000 node src/server.js"
+      ],
+      "port": 4320
+    },
+    {
+      "name": "dashboard-docs",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4330",
+        "--bind",
+        "127.0.0.1",
+        "-d",
+        "docs"
+      ],
+      "port": 4330
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "dashboard",
+  "version": "0.7.0",
+  "private": true,
+  "description": "Panel local con los proyectos y sesiones de Codex y Claude Code de esta máquina",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jfmargar/dashboard.git"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test"
+  }
+}

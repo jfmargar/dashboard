@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#14161c">
+  <title>Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="clock">
+      <div class="clock-time" id="clock-time">--:--</div>
+      <div class="clock-date" id="clock-date"></div>
+    </div>
+    <div class="totals" id="totals"></div>
+    <button class="usage-toggle" id="usage-toggle" aria-expanded="false" aria-controls="usage"></button>
+  </header>
+
+  <section class="usage" id="usage" aria-label="Uso de los agentes"></section>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-view="office" id="tab-office"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 8 8"><rect x="2" y="0" width="4" height="2"/><rect x="3" y="2" width="2" height="1"/><rect x="0" y="3" width="8" height="1"/><rect x="1" y="4" width="1" height="4"/><rect x="6" y="4" width="1" height="4"/></svg></span><span class="tab-label">Oficina</span></button>
+    <button class="tab" role="tab" data-view="missions" id="tab-missions"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 8 8"><rect x="1" y="0" width="1" height="8"/><rect x="2" y="0" width="5" height="1"/><rect x="2" y="1" width="4" height="1"/><rect x="2" y="2" width="5" height="1"/><rect x="2" y="3" width="3" height="1"/><rect x="0" y="7" width="4" height="1"/></svg></span><span class="tab-label">Misiones</span></button>
+    <button class="capture-btn" id="capture-btn" aria-label="Apuntar una nota en la bandeja" hidden><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 8 8"><rect x="3" y="1" width="2" height="6"/><rect x="1" y="3" width="6" height="2"/></svg></span><span class="tab-label">Apuntar</span></button>
+    <button class="tab" role="tab" data-view="inbox" id="tab-inbox" hidden><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 8 8"><rect x="0" y="1" width="8" height="1"/><rect x="0" y="6" width="8" height="1"/><rect x="0" y="2" width="1" height="4"/><rect x="7" y="2" width="1" height="4"/><rect x="1" y="2" width="1" height="1"/><rect x="2" y="3" width="1" height="1"/><rect x="3" y="4" width="2" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/></svg></span><span class="tab-label">Bandeja</span><span class="tab-badge" id="inbox-badge" hidden></span></button>
+  </nav>
+
+  <main>
+    <section class="view" id="view-office" hidden>
+      <div class="new-session" id="new-session" hidden></div>
+      <div class="office-stage"><canvas id="office-canvas"></canvas></div>
+      <div class="office-detail" id="office-detail">Toca un personaje para ver qué está haciendo.</div>
+    </section>
+
+    <section class="view" id="view-missions" hidden>
+      <div class="view-switch" role="group" aria-label="Cómo ver las misiones"><button type="button" data-switch="missions">Tablero</button><button type="button" data-switch="panel">Lista</button></div>
+      <div class="missions" id="missions"></div>
+      <div class="mission-compose" id="mission-compose" hidden></div>
+    </section>
+
+    <section class="view" id="view-panel" hidden>
+      <div class="view-switch" role="group" aria-label="Cómo ver las misiones"><button type="button" data-switch="missions">Tablero</button><button type="button" data-switch="panel">Lista</button></div>
+      <section class="now" aria-labelledby="now-title">
+        <h2 class="section-title" id="now-title">Ahora</h2>
+        <ol class="now-list" id="now-list"></ol>
+      </section>
+
+      <div id="zones"></div>
+    </section>
+
+    <section class="view" id="view-inbox" hidden>
+      <div class="inbox-capture" id="inbox-capture"></div>
+      <div class="inbox-list" id="inbox-list"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span><span id="version"></span><span id="updated"></span></span>
+    <span class="offline" id="offline" hidden>Sin conexión con el Mac</span>
+  </footer>
+
+  <script src="office.js"></script>
+  <script src="missions.js"></script>
+  <script src="inbox.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

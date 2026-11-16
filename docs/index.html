@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard</title>
+<meta name="description" content="Una oficina en pixel art donde cada sesión de Codex y Claude Code de tu Mac es un personaje. Panel local en Node 24, sin dependencias.">
+<meta property="og:title" content="Dashboard: tus agentes de código en una oficina pixel art">
+<meta property="og:description" content="Ves qué sesión de Codex o Claude Code trabaja, cuál te espera y le contestas desde la tablet. Local, sin dependencias y solo en tu tailnet.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://jfmargar.github.io/dashboard/">
+<meta property="og:image" content="https://jfmargar.github.io/dashboard/images/social.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="images/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: oficina nocturna en pixel art. Una columna de lectura (~68ch) con capturas reales a todo el ancho. Tema único oscuro, como el propio panel. */
+:root {
+  --night: #12141d;
+  --floor: #1b1e2b;
+  --wall: #252a3b;
+  --line: #333a52;
+  --paper: #ebe7dc;
+  --dim: #9da1b4;
+  --claude: #d97757;
+  --codex: #5b9cf0;
+  --working: #6cc788;
+  --yours: #f2c14e;
+  --done: #69d2d9;
+  --alert: #e5534b;
+  --pixel: "Silkscreen", "Courier New", monospace;
+  --body: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body { margin: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+img { max-width: 100%; }
+a { color: var(--yours); }
+body { background: var(--night); color: var(--paper); font-family: var(--body); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.prose { max-width: 68ch; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.15; margin: 0; }
+h2 { font-family: var(--pixel); font-weight: 400; font-size: clamp(22px, 3.4vw, 30px); letter-spacing: .02em; }
+h3 { font-size: 17px; font-weight: 600; }
+p { margin: 0; }
+code, .mono { font-family: var(--mono); font-size: .9em; }
+.eyebrow { font-family: var(--pixel); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+section { padding-block: 64px; }
+section + section { border-top: 1px solid var(--line); }
+.stack { display: flex; flex-direction: column; gap: 16px; }
+
+/* Hero */
+.hero { padding-block: 56px 48px; }
+.hero h1 { font-family: var(--pixel); font-weight: 400; font-size: clamp(36px, 8vw, 72px); letter-spacing: .01em; overflow-wrap: anywhere; }
+.hero h1 span { color: var(--yours); }
+.hero .lede { font-size: clamp(18px, 2.2vw, 21px); max-width: 40ch; }
+.hero .meta { display: flex; flex-wrap: wrap; gap: 8px 20px; color: var(--dim); font-size: 14px; }
+.hero .meta b { color: var(--paper); font-weight: 500; }
+/* Título y texto arriba, captura a todo el ancho debajo: en dos columnas el título pixel no cabía y la imagen lo tapaba. */
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 36px; }
+
+/* Capturas */
+.shot { margin: 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.shot img { display: block; width: 100%; height: auto; border: 2px solid var(--line); background: var(--floor); }
+.shot figcaption { font-size: 13.5px; color: var(--dim); }
+.demo-note { font-size: 12.5px; color: var(--dim); font-family: var(--mono); }
+.gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+@media (max-width: 720px) { .gallery { grid-template-columns: minmax(0, 1fr); } }
+.phones { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.phone { margin: 0; width: min(100%, 250px); display: flex; flex-direction: column; gap: 10px; }
+.phone .frame { border: 2px solid var(--line); border-radius: 30px; padding: 8px; background: #0c0e15; }
+.phone img { display: block; width: 100%; height: auto; border-radius: 22px; }
+.phone figcaption { font-size: 13.5px; color: var(--dim); }
+.side { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 40px; align-items: start; }
+@media (max-width: 760px) { .side { grid-template-columns: minmax(0, 1fr); } }
+
+/* Estados */
+.states { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.state { background: var(--floor); padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 8px; font-family: var(--pixel); font-size: 13px; letter-spacing: .04em; }
+.chip i { width: 10px; height: 10px; display: inline-block; }
+.state p { color: var(--dim); font-size: 14.5px; }
+.state small { font-family: var(--mono); font-size: 12px; color: var(--dim); }
+
+/* Vistas */
+.views { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+@media (max-width: 820px) { .views { grid-template-columns: minmax(0, 1fr); } }
+.view { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.view .tab { font-family: var(--pixel); font-size: 15px; color: var(--yours); }
+.view p { color: var(--dim); font-size: 15px; }
+.view ul { margin: 0; padding-left: 18px; font-size: 15px; display: flex; flex-direction: column; gap: 6px; }
+
+/* Acciones */
+.actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); border-top: 1px solid var(--line); }
+.action { padding: 18px 20px 18px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 4px 12px; }
+.action .ico { grid-row: span 2; width: 26px; height: 26px; margin-top: 2px; }
+.action p { color: var(--dim); font-size: 14.5px; }
+.perm { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.perm span { font-family: var(--mono); font-size: 12px; padding: 2px 8px; background: var(--wall); }
+
+/* Barra de menú (maqueta fiel al menú de DashboardMenu.swift) */
+.menubar-demo { background: linear-gradient(160deg, #2b3550, #1a1f2e); border: 2px solid var(--line); padding-bottom: 22px; overflow-x: auto; }
+.mb-bar { display: flex; justify-content: flex-end; align-items: center; gap: 16px; height: 28px; padding: 0 14px; background: rgba(20, 22, 30, .75); font-size: 13px; color: var(--paper); min-width: 340px; }
+.mb-bar .other { color: var(--dim); }
+.mb-item { display: inline-flex; align-items: center; gap: 5px; padding: 1px 8px; border-radius: 5px; background: rgba(235, 231, 220, .2); font-variant-numeric: tabular-nums; }
+.mb-item svg { width: 15px; height: 13px; display: block; }
+.mb-menu { margin: 6px 14px 0 auto; width: 340px; max-width: calc(100% - 28px); background: #2b2f3c; border: 1px solid #4a5068; border-radius: 9px; padding: 5px; font-size: 13px; box-shadow: 0 12px 32px rgba(0, 0, 0, .5); }
+.mb-row { display: flex; justify-content: space-between; gap: 12px; padding: 3px 10px 3px 26px; border-radius: 4px; color: var(--paper); }
+.mb-row.dis { color: #8b8fa3; }
+.mb-row.hi { background: #3b74d6; color: #fff; }
+.mb-row kbd { font-family: var(--body); color: #8b8fa3; }
+.mb-row.hi kbd { color: #fff; }
+.mb-row.check { position: relative; }
+.mb-row.check::before { content: "✓"; position: absolute; left: 9px; }
+.mb-sep { height: 1px; background: #4a5068; margin: 5px 10px; }
+.menu-points { display: flex; flex-direction: column; gap: 12px; }
+.menu-points li { color: var(--dim); font-size: 15px; }
+.menu-points li b { color: var(--paper); font-weight: 500; }
+.menu-points ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; }
+
+/* Casos de uso */
+.cases { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 720px) { .cases { grid-template-columns: minmax(0, 1fr); } }
+.case { background: var(--floor); padding: 22px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.case .when { font-family: var(--mono); font-size: 12.5px; color: var(--yours); }
+.case p { color: var(--dim); font-size: 15px; }
+.case ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 14.5px; }
+
+/* Flujo */
+.flow-box { overflow-x: auto; background: var(--floor); border: 2px solid var(--line); padding: 16px; }
+.flow-box svg { display: block; min-width: 760px; width: 100%; height: auto; }
+
+/* Garantías */
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px 32px; }
+.rule { display: flex; flex-direction: column; gap: 6px; }
+.rule h3::before { content: ""; display: inline-block; width: 8px; height: 8px; background: var(--working); margin-right: 10px; vertical-align: 2px; }
+.rule p { color: var(--dim); font-size: 14.5px; }
+
+/* Requisitos */
+.req-wrap { overflow-x: auto; border: 2px solid var(--line); }
+.req { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 14.5px; }
+.req th { text-align: left; font-family: var(--pixel); font-weight: 400; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); background: var(--floor); padding: 10px 14px; }
+.req td { padding: 12px 14px; border-top: 1px solid var(--line); vertical-align: top; color: var(--dim); }
+.req td:first-child { color: var(--paper); width: 30%; }
+.req td:last-child { width: 32%; }
+.req b { font-weight: 600; }
+.req code { color: var(--paper); }
+.need { display: block; width: fit-content; margin-top: 6px; font-family: var(--mono); font-size: 11.5px; padding: 1px 7px; background: var(--wall); color: var(--dim); }
+.need.must { background: color-mix(in srgb, var(--yours) 22%, transparent); color: var(--yours); }
+
+/* Arrancar */
+.steps { display: flex; flex-direction: column; gap: 18px; }
+.step { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 4px 14px; }
+.step .n { font-family: var(--pixel); color: var(--yours); font-size: 18px; grid-row: span 2; }
+.step p { color: var(--dim); font-size: 14.5px; }
+pre { margin: 6px 0 0; background: #0c0e15; border: 1px solid var(--line); padding: 10px 14px; overflow-x: auto; font-family: var(--mono); font-size: 13.5px; color: var(--paper); }
+
+.cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.cta a { font-family: var(--pixel); font-size: 14px; letter-spacing: .04em; text-decoration: none; padding: 10px 16px; border: 2px solid var(--yours); color: var(--night); background: var(--yours); }
+.cta a.ghost { background: transparent; color: var(--yours); }
+.cta a:focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; }
+.hero-title { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.hero-title img { width: 60px; height: 60px; flex: none; }
+.hero .hero-title h1 { font-size: clamp(34px, 6vw, 64px); }
+footer a { color: var(--paper); }
+footer { padding-block: 32px 48px; color: var(--dim); font-size: 13px; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+
+
+<header class="wrap hero">
+  <div class="hero-grid">
+    <div class="stack" style="gap:22px">
+      <span class="eyebrow">Código abierto · MIT · v0.6.1</span>
+      <div class="hero-title"><img src="images/icon.png" width="60" height="60" alt=""><h1>Dash<span>board</span></h1></div>
+      <p class="lede">Una oficina en pixel art donde cada sesión de Codex y Claude Code de tu Mac es un personaje. Ves quién trabaja, quién te espera y le contestas desde la tablet o el móvil.</p>
+      <div class="cta">
+        <a href="https://github.com/jfmargar/dashboard">Ver en GitHub</a>
+        <a class="ghost" href="#instalar">Instalarlo</a>
+      </div>
+      <div class="meta">
+        <span><b>Node 24</b>, sin dependencias</span>
+        <span>Solo en tu <b>Mac</b> y tu <b>tailnet</b></span>
+        <span>App de <b>barra de menú</b> incluida</span>
+      </div>
+    </div>
+    <figure class="shot">
+      <img src="images/oficina.webp" width="800" height="555" alt="Vista Oficina en tablet: Parking y Reservas trabajando, Blog y Huerto esperando con «!», Recetas con su coordinadora y una delegada, y el pasillo de salas sin uso">
+      <figcaption>La Oficina en un iPad apaisado. Rojo para la zona de trabajo, azul para la personal; los bocadillos dicen qué hace cada sesión.</figcaption>
+    </figure>
+  </div>
+  <p class="demo-note" style="margin-top:20px">Todas las capturas son de una instancia de demostración con proyectos y sesiones inventados.</p>
+</header>
+
+<main>
+  <section class="wrap stack" style="gap:28px">
+    <div class="prose stack">
+      <span class="eyebrow">Qué resuelve</span>
+      <h2>Varios agentes a la vez, ninguno olvidado</h2>
+      <p>Con varias sesiones abiertas entre Codex, Claude Code y sus subagentes es fácil perder la que lleva media hora esperando una respuesta. El panel lee los registros que esas apps ya guardan en el Mac y los convierte en estados que se entienden de lejos, en una pantalla aparte o en la tablet.</p>
+    </div>
+    <div class="states">
+      <div class="state">
+        <span class="chip" style="color:var(--working)"><i style="background:var(--working)"></i>Trabajando</span>
+        <p>Turno abierto con actividad reciente. El personaje se sienta a teclear y su pantalla se enciende.</p>
+        <small>working · &lt; 15 min</small>
+      </div>
+      <div class="state">
+        <span class="chip" style="color:var(--yours)"><i style="background:var(--yours)"></i>Te espera</span>
+        <p>Una pregunta, una aprobación o un plan por revisar. Espera de pie con «!» y entra en la cola de la recepción.</p>
+        <small>yours · &lt; 4 h</small>
+      </div>
+      <div class="state">
+        <span class="chip" style="color:var(--done)"><i style="background:var(--done)"></i>Terminada</span>
+        <p>Cerró el turno sin pedirte nada. Suelta unas chispas y se va a la zona común con un visto.</p>
+        <small>done</small>
+      </div>
+      <div class="state">
+        <span class="chip" style="color:var(--alert)"><i style="background:var(--alert)"></i>¿Atascada?</span>
+        <p>Lleva 10 minutos trabajando sin escribir nada. Aparece un «?» rojo que parpadea sobre su cabeza.</p>
+        <small>isStuck · 10 min</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap stack" style="gap:32px">
+    <div class="prose stack">
+      <span class="eyebrow">Tres pestañas y un botón</span>
+      <h2>Oficina, Misiones y Bandeja</h2>
+      <p>Arriba siempre quedan la hora, los contadores y el uso de las ventanas de 5 horas y semanal de cada agente. El botón <b>Apuntar</b> está a mano en todas las vistas.</p>
+    </div>
+    <div class="views">
+      <article class="view">
+        <span class="tab">Oficina</span>
+        <h3>Cada proyecto es un puesto</h3>
+        <p>Los proyectos activos de la semana tienen mesa y letrero; los que no se mueven se pliegan como puertas en el pasillo «Salas sin uso».</p>
+        <ul>
+          <li>Letreros con los pasos del plan («3/5» y barra) y un bocadillo con lo que hace</li>
+          <li>Coordinadoras con anillo azul, delegadas de issue con su número y subagentes que entran a ayudar</li>
+          <li>Pellizco, zoom, plantas por zona en el móvil y modo ambiente con la cámara paseando</li>
+          <li>Mantener pulsado un personaje abre el menú: Abrir, Contestar, Aprobar o Parar</li>
+        </ul>
+      </article>
+      <article class="view">
+        <span class="tab">Misiones</span>
+        <h3>Un tablero de equipos</h3>
+        <p>Cada coordinadora con sus delegadas forma un equipo, que camina a la sala de su miembro más urgente.</p>
+        <ul>
+          <li>Salas: Por lanzar, Trabajando, Te esperan, Revisión, Hechas y En pausa · hoy</li>
+          <li>Emblema en el pecho: asterisco naranja para Claude, <code>&gt;_</code> azul para Codex</li>
+          <li><b>Hablar</b> y <b>Escribir</b> a la coordinadora sin abrir su ficha</li>
+          <li>Tablón «Por lanzar» con las notas de la Bandeja listas para empezar</li>
+        </ul>
+      </article>
+      <article class="view">
+        <span class="tab">Bandeja</span>
+        <h3>Ideas que acaban en trabajo</h3>
+        <p>Dictas o escribes una nota y, en segundos, Haiku propone proyecto, título y descripción eligiendo solo entre tus proyectos.</p>
+        <ul>
+          <li>Crear un issue en GitLab o GitHub asignado a ti</li>
+          <li>Crear una tarea en Datask, en la lista TODO del proyecto</li>
+          <li>Lanzar una sesión de Claude o Codex con el encargo de la nota</li>
+          <li>Seguimiento cada 15 min: al cerrarse todo, la nota se archiva</li>
+        </ul>
+      </article>
+    </div>
+    <div class="gallery">
+      <figure class="shot">
+        <img src="images/misiones.webp" width="800" height="555" loading="lazy" alt="Vista Misiones: tablón Por lanzar con tres notas, equipos en Trabajando, dos sesiones en Te esperan con Hablar destacado y una en Hechas">
+        <figcaption>Misiones. Tres notas esperan en «Por lanzar»; Huerto y Blog te esperan con <b>Hablar</b> resaltado; Fichajes ya está en «Hechas».</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="images/bandeja.webp" width="800" height="555" loading="lazy" alt="Vista Bandeja: cuadro para apuntar con micrófono y tarjetas de notas con su proyecto y los destinos Issue en GitHub, Issue en GitLab, Tarea en Datask y Lanzar sesión">
+        <figcaption>Bandeja. Cada nota llega con su plan y los destinos que tiene su proyecto: issue, tarea de Datask o sesión.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="wrap stack" style="gap:28px">
+    <div class="prose stack">
+      <span class="eyebrow">Ficha de sesión</span>
+      <h2>No solo mirar: contestar</h2>
+      <p>Al tocar un personaje se abre su ficha: el último encargo, la respuesta en curso en vivo y el historial. Desde ahí el Mac continúa la sesión en segundo plano con el CLI de su agente. Toda orden pasa por <b>Revisar</b> antes de enviarse.</p>
+    </div>
+    <figure class="shot">
+      <img src="images/ficha.webp" width="800" height="555" loading="lazy" alt="Ficha de la sesión Artículo sobre Tailscale abierta junto a la oficina: el encargo, la pregunta de Claude y el cuadro de respuesta con micrófono y botón Revisar">
+      <figcaption>La sesión del Blog pregunta si publica el borrador. La respuesta se escribe o se dicta abajo y se revisa antes de enviarla.</figcaption>
+    </figure>
+    <div class="actions">
+      <div class="action">
+        <svg class="ico" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="1" width="8" height="5" fill="#5b9cf0"/><rect x="2" y="6" width="2" height="2" fill="#5b9cf0"/><rect x="1" y="3" width="6" height="1" fill="#12141d"/></svg>
+        <h3>Contestar y dar indicaciones</h3>
+        <p>Envía una orden a la sesión o, con Codex trabajando, una indicación sobre la marcha sin pararla.</p>
+      </div>
+      <div class="action">
+        <svg class="ico" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect x="1" y="4" width="2" height="2" fill="#6cc788"/><rect x="3" y="5" width="1" height="2" fill="#6cc788"/><rect x="4" y="3" width="1" height="3" fill="#6cc788"/><rect x="5" y="1" width="2" height="2" fill="#6cc788"/></svg>
+        <h3>Aprobar o parar</h3>
+        <p>Las aprobaciones pendientes y Parar piden un segundo toque, para que nada se dispare por accidente.</p>
+      </div>
+      <div class="action">
+        <svg class="ico" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect x="3" y="0" width="2" height="5" fill="#f2c14e"/><rect x="1" y="3" width="1" height="2" fill="#f2c14e"/><rect x="6" y="3" width="1" height="2" fill="#f2c14e"/><rect x="2" y="5" width="4" height="1" fill="#f2c14e"/><rect x="3" y="6" width="2" height="2" fill="#f2c14e"/></svg>
+        <h3>Dictado local</h3>
+        <p>Cada cuadro de texto tiene micrófono. Transcribe <code>mlx-whisper</code> en el propio Mac, con los nombres de tus proyectos como pista.</p>
+      </div>
+      <div class="action">
+        <svg class="ico" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect x="3" y="0" width="2" height="8" fill="#d97757"/><rect x="0" y="3" width="8" height="2" fill="#d97757"/></svg>
+        <h3>Nueva sesión</h3>
+        <p>Elige proyecto, agente y nivel de permisos, y el personaje entra por la puerta.</p>
+        <div class="perm"><span>Auto</span><span>Editar</span><span>Solo mirar</span></div>
+      </div>
+      <div class="action">
+        <svg class="ico" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="2" width="5" height="5" fill="#69d2d9"/><rect x="1" y="3" width="3" height="3" fill="#12141d"/><rect x="4" y="0" width="4" height="1" fill="#69d2d9"/><rect x="7" y="0" width="1" height="4" fill="#69d2d9"/><rect x="5" y="2" width="1" height="1" fill="#69d2d9"/></svg>
+        <h3>Abrir en su app</h3>
+        <p>Las sesiones de la app de Claude se abren con Remote Control; las de Codex, en su app del Mac o en ChatGPT en el móvil.</p>
+      </div>
+      <div class="action">
+        <svg class="ico" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="1" width="8" height="2" fill="#9da1b4"/><rect x="1" y="3" width="6" height="4" fill="#9da1b4"/><rect x="3" y="4" width="2" height="1" fill="#12141d"/></svg>
+        <h3>Archivar</h3>
+        <p>Quita del panel los equipos en pausa o terminados hasta que vuelvan a moverse. No toca las apps.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap stack" style="gap:28px">
+    <div class="prose stack">
+      <span class="eyebrow">En el bolsillo</span>
+      <h2>Pensado para el iPhone y el iPad</h2>
+      <p>En el móvil la oficina abre en la planta que te espera, con las zonas como plantas que se cambian deslizando. La barra inferior queda al alcance del pulgar, los controles miden al menos 44 px y la ficha sube como una hoja con tres alturas.</p>
+    </div>
+    <div class="phones">
+      <figure class="phone">
+        <div class="frame"><img src="images/movil-oficina.webp" width="750" height="1624" loading="lazy" alt="Oficina en un iPhone: planta Personal con el puesto del Blog, su personaje esperando y el bocadillo con su último mensaje"></div>
+        <figcaption>Oficina, planta Personal. El bocadillo amarillo es lo último que dijo la sesión que te espera.</figcaption>
+      </figure>
+      <figure class="phone">
+        <div class="frame"><img src="images/movil-misiones.webp" width="375" height="812" loading="lazy" alt="Misiones en un iPhone: sala Te esperan con dos sesiones y sus botones Hablar y Escribir"></div>
+        <figcaption>Misiones apila las salas por urgencia: primero lo que te espera.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="wrap stack" style="gap:28px">
+    <div class="prose stack">
+      <span class="eyebrow">macOS · Swift</span>
+      <h2>El icono de la barra de menú</h2>
+      <p><code>macos/install.sh</code> deja el panel como servicio del Mac y compila <code>Dashboard.app</code>, una app pequeña en Swift que vive en la barra superior. Junto al icono enseña cuántas sesiones trabajan y cuántas te esperan.</p>
+    </div>
+    <div class="side">
+      <div class="menubar-demo" role="img" aria-label="Maqueta del menú de Dashboard.app con el estado del panel y sus acciones">
+        <div class="mb-bar">
+          <span class="other">Wi-Fi</span>
+          <span class="mb-item"><svg viewBox="0 0 15 13" aria-hidden="true"><rect x="1" y="4" width="6" height="9" fill="#ebe7dc"/><rect x="8" y="1" width="6" height="12" fill="#ebe7dc"/><rect x="2.5" y="6" width="1.5" height="1.5" fill="#262a36"/><rect x="4.5" y="6" width="1.5" height="1.5" fill="#262a36"/><rect x="9.5" y="3" width="1.5" height="1.5" fill="#262a36"/><rect x="11.5" y="3" width="1.5" height="1.5" fill="#262a36"/><rect x="9.5" y="6" width="1.5" height="1.5" fill="#262a36"/><rect x="11.5" y="6" width="1.5" height="1.5" fill="#262a36"/></svg>4·2</span>
+          <span class="other">lun 16 nov 09:52</span>
+        </div>
+        <div class="mb-menu">
+          <div class="mb-row dis">Panel en marcha · 4 trabajando · 2 te toca</div>
+          <div class="mb-sep"></div>
+          <div class="mb-row hi">Abrir el panel <kbd>⌘O</kbd></div>
+          <div class="mb-row">Copiar la dirección para la tablet</div>
+          <div class="mb-row dis">https://mi-mac.tailnet.ts.net</div>
+          <div class="mb-sep"></div>
+          <div class="mb-row">Reiniciar <kbd>⌘R</kbd></div>
+          <div class="mb-row">Parar</div>
+          <div class="mb-row">Ver el registro</div>
+          <div class="mb-sep"></div>
+          <div class="mb-row check">Mostrar el icono al iniciar sesión</div>
+          <div class="mb-row">Quitar el icono <kbd>⌘Q</kbd></div>
+        </div>
+      </div>
+      <div class="menu-points">
+        <ul>
+          <li><b>De un vistazo.</b> El icono se apaga si el panel está parado y muestra «4·2» cuando hay sesiones trabajando y esperándote. Consulta <code>/api/state</code> cada 5 segundos.</li>
+          <li><b>Controla el servicio.</b> Arrancar, parar y reiniciar el LaunchAgent sin abrir la terminal, y abrir el registro en <code>~/Library/Logs/Dashboard.log</code>.</li>
+          <li><b>Lleva a la tablet.</b> Copia la dirección de Tailscale para abrir el panel en el iPad.</li>
+          <li><b>Discreto.</b> Sin icono en el Dock, se abre al iniciar sesión si quieres, y cerrarlo no para el panel. <code>macos/uninstall.sh</code> lo quita todo.</li>
+        </ul>
+        <p class="demo-note">Maqueta del menú hecha a partir de <code>macos/DashboardMenu.swift</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap stack" style="gap:28px">
+    <div class="prose stack">
+      <span class="eyebrow">Casos de uso</span>
+      <h2>Un día con el panel</h2>
+    </div>
+    <div class="cases">
+      <article class="case">
+        <span class="when">09:00 · al llegar</span>
+        <h3>Ver de un vistazo cómo quedó todo</h3>
+        <p>La oficina abre en la planta que te espera. Las sesiones que acabaron de noche están en la zona común con su visto; las que te preguntaron algo hacen cola en recepción.</p>
+      </article>
+      <article class="case">
+        <span class="when">11:30 · desde el sofá o la reunión</span>
+        <h3>Desbloquear un agente sin ir al Mac</h3>
+        <ol>
+          <li>El botón «te esperan» destella y el móvil vibra.</li>
+          <li>Tocas la recepción y vuelas a la siguiente sesión.</li>
+          <li>Dictas la respuesta, la revisas y la envías.</li>
+        </ol>
+      </article>
+      <article class="case">
+        <span class="when">13:10 · se te ocurre algo</span>
+        <h3>De idea a issue y a sesión</h3>
+        <ol>
+          <li><b>Apuntar</b> y dictas «en el blog, añadir RSS».</li>
+          <li>Haiku propone proyecto, título y descripción.</li>
+          <li>Creas el issue en GitHub y lanzas una sesión que trabaja sobre él.</li>
+          <li>El equipo pasa por Revisión y llega a Hechas al cerrarse el issue.</li>
+        </ol>
+      </article>
+      <article class="case">
+        <span class="when">16:00 · una épica en marcha</span>
+        <h3>Seguir a una coordinadora y sus delegadas</h3>
+        <p>En Misiones el equipo entero aparece junto. Si una delegada pregunta, todos caminan a «Te esperan» y ella lleva el «!». Le hablas a la coordinadora con <b>Hablar</b> sin abrir nada.</p>
+      </article>
+      <article class="case">
+        <span class="when">Todo el día · en una pantalla aparte</span>
+        <h3>Modo ambiente</h3>
+        <p>Tras un minuto sin tocar nada, el panel deja solo la oficina y el reloj, mantiene la pantalla encendida y la cámara pasea entre los puestos activos.</p>
+      </article>
+      <article class="case">
+        <span class="when">20:00 · fin del día</span>
+        <h3>Cuánto se ha movido hoy</h3>
+        <p>Con todo parado, la pizarra de la pared cuenta las sesiones que han tenido actividad. Arriba sigues viendo cuánto queda de las ventanas de uso de Claude y Codex.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="wrap stack" style="gap:28px">
+    <div class="prose stack">
+      <span class="eyebrow">Cómo funciona</span>
+      <h2>Lee lo que ya existe, sin tocarlo</h2>
+      <p>Un servidor Node sin dependencias lee en solo lectura las bases de datos y registros de las apps, y sirve la página en <code>127.0.0.1:4317</code>. La tablet llega a través de <code>tailscale serve</code>. Las órdenes las ejecutan los CLI oficiales de cada agente.</p>
+    </div>
+    <div class="flow-box">
+      <svg viewBox="0 0 760 250" role="img" aria-label="Diagrama: registros de Codex y Claude alimentan el servidor local, que sirve el panel al Mac, a la barra de menú y a la tablet por Tailscale; las órdenes vuelven por los CLI">
+        <defs>
+          <marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#9da1b4"/></marker>
+        </defs>
+        <g font-family="IBM Plex Mono, monospace" font-size="12" fill="#ebe7dc">
+          <rect x="10" y="20" width="190" height="56" fill="#252a3b" stroke="#d97757" stroke-width="2"/>
+          <text x="22" y="43" fill="#d97757">Claude Code</text>
+          <text x="22" y="62" fill="#9da1b4">~/.claude/projects/*.jsonl</text>
+          <rect x="10" y="96" width="190" height="56" fill="#252a3b" stroke="#5b9cf0" stroke-width="2"/>
+          <text x="22" y="119" fill="#5b9cf0">Codex</text>
+          <text x="22" y="138" fill="#9da1b4">~/.codex/state.sqlite</text>
+          <rect x="10" y="172" width="190" height="56" fill="#252a3b" stroke="#333a52" stroke-width="2"/>
+          <text x="22" y="195">Bandeja y catálogo</text>
+          <text x="22" y="214" fill="#9da1b4">data/inbox.json</text>
+
+          <rect x="290" y="70" width="190" height="110" fill="#1b1e2b" stroke="#f2c14e" stroke-width="2"/>
+          <text x="304" y="96" fill="#f2c14e" font-family="Silkscreen, monospace" font-size="14">Servidor local</text>
+          <text x="304" y="120">node src/server.js</text>
+          <text x="304" y="140" fill="#9da1b4">/api/state cada 5 s</text>
+          <text x="304" y="160" fill="#9da1b4">SSE para la ficha en vivo</text>
+
+          <rect x="560" y="20" width="190" height="56" fill="#252a3b" stroke="#333a52" stroke-width="2"/>
+          <text x="572" y="43">Navegador del Mac</text>
+          <text x="572" y="62" fill="#9da1b4">localhost:4317</text>
+          <rect x="560" y="96" width="190" height="56" fill="#252a3b" stroke="#333a52" stroke-width="2"/>
+          <text x="572" y="119">iPad / iPhone</text>
+          <text x="572" y="138" fill="#9da1b4">tailscale serve</text>
+          <rect x="560" y="172" width="190" height="56" fill="#252a3b" stroke="#333a52" stroke-width="2"/>
+          <text x="572" y="195">Barra de menú</text>
+          <text x="572" y="214" fill="#9da1b4">Dashboard.app (Swift)</text>
+        </g>
+        <g stroke="#9da1b4" stroke-width="1.5" fill="none" marker-end="url(#ar)">
+          <path d="M200 48 C245 48 245 100 288 100"/>
+          <path d="M200 124 L288 124"/>
+          <path d="M200 200 C245 200 245 150 288 150"/>
+          <path d="M480 100 C520 100 520 48 558 48"/>
+          <path d="M480 124 L558 124"/>
+          <path d="M480 150 C520 150 520 200 558 200"/>
+        </g>
+        <g stroke="#6cc788" stroke-width="1.5" fill="none" stroke-dasharray="4 4" marker-end="url(#ar)">
+          <path d="M385 180 L385 236 L120 236 L120 230"/>
+        </g>
+        <text x="190" y="248" font-family="IBM Plex Mono, monospace" font-size="11" fill="#6cc788">órdenes: claude -p --resume · codex app-server · glab / gh / datask</text>
+      </svg>
+    </div>
+  </section>
+
+  <section class="wrap stack" style="gap:28px">
+    <div class="prose stack">
+      <span class="eyebrow">Garantías</span>
+      <h2>Privado por diseño</h2>
+    </div>
+    <div class="rules">
+      <div class="rule"><h3>Nunca en internet</h3><p>Escucha en <code>127.0.0.1</code>. Fuera del Mac solo por tu tailnet, y las órdenes solo se aceptan de tu propia cuenta de Tailscale. Por Funnel o por otro proxy no enseña nada.</p></div>
+      <div class="rule"><h3>Solo lectura de las apps</h3><p>No escribe a mano en <code>~/.codex</code> ni en <code>~/.claude</code>. Solo los propios CLI los modifican al ejecutar una orden.</p></div>
+      <div class="rule"><h3>Todo pasa por ti</h3><p>Órdenes, issues, tareas y sesiones se revisan antes de enviarse. Nada se crea fuera del Mac sin tu aprobación.</p></div>
+      <div class="rule"><h3>Tu voz se queda en casa</h3><p>El dictado se transcribe en el Mac. El audio no sale de él.</p></div>
+    </div>
+  </section>
+
+  <section class="wrap stack" style="gap:28px">
+    <div class="prose stack">
+      <span class="eyebrow">Ponerlo en marcha</span>
+      <h2>Qué necesitas</h2>
+      <p>Lo único imprescindible es Node. Cada pieza más enciende una parte del panel: sin ella, esa parte no aparece o queda desactivada, y el resto sigue funcionando.</p>
+    </div>
+    <div class="req-wrap">
+      <table class="req">
+        <thead><tr><th>Pieza</th><th>Para qué</th><th>Cómo tenerla</th></tr></thead>
+        <tbody>
+          <tr><td><b>macOS</b><span class="need must">Imprescindible</span></td><td>El panel lee las apps de Claude y Codex de este Mac. El dictado necesita un chip Apple Silicon.</td><td>—</td></tr>
+          <tr><td><b>Node.js 24</b> o superior<span class="need must">Imprescindible</span></td><td>El servidor. No hay dependencias de npm.</td><td><code>brew install node</code></td></tr>
+          <tr><td><b>Claude Code</b> de terminal, con sesión iniciada<span class="need">Para Claude</span></td><td>Contestar y abrir sesiones de Claude, los planes de la Bandeja (con Haiku) y el uso de Claude.</td><td><code>claude</code> y dentro <code>/login</code></td></tr>
+          <tr><td><b>App de Codex</b> (la de ChatGPT para Mac)<span class="need">Para Codex</span></td><td>Trae el CLI de Codex que usa el panel para contestar y abrir sesiones.</td><td>Instalar la app y entrar con tu cuenta</td></tr>
+          <tr><td><b>mlx-whisper</b> y <b>ffmpeg</b><span class="need">Opcional</span></td><td>Dictado en el Mac. La primera transcripción descarga el modelo <code>whisper-large-v3-turbo</code>, unos 1,6 GB; después tarda unos segundos.</td><td><code>brew install pipx ffmpeg</code><br><code>pipx install mlx-whisper</code></td></tr>
+          <tr><td><b>Tailscale</b> en el Mac y en la tablet o el móvil<span class="need">Opcional</span></td><td>Abrir el panel fuera del Mac por HTTPS. El micrófono solo funciona en <code>localhost</code> o por HTTPS.</td><td>App de Tailscale y <code>tailscale serve --bg 4317</code></td></tr>
+          <tr><td><b>gh</b> o <b>glab</b>, con sesión iniciada<span class="need">Opcional</span></td><td>Crear issues en GitHub o GitLab desde la Bandeja y seguir si se cierran.</td><td><code>brew install gh glab</code><br><code>gh auth login</code> · <code>glab auth login</code></td></tr>
+          <tr><td><b>CLI de Datask</b><span class="need">Opcional</span></td><td>Crear tareas en Datask desde la Bandeja.</td><td>Solo si ya la usas</td></tr>
+          <tr><td><b>Herramientas de línea de comandos de Xcode</b><span class="need">Opcional</span></td><td>Compilar con <code>swiftc</code> el icono de la barra de menú.</td><td><code>xcode-select --install</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prose stack" style="margin-top:12px">
+      <h2 id="instalar">Tres pasos</h2>
+    </div>
+    <div class="steps prose">
+      <div class="step"><span class="n">1</span><h3>Descargarlo y arrancarlo</h3><div><p>Requiere Node.js 24 o superior. Después abre <code>http://localhost:4317</code>.</p><pre>git clone https://github.com/jfmargar/dashboard.git
+cd dashboard
+npm start</pre></div></div>
+      <div class="step"><span class="n">2</span><h3>Dejarlo como servicio</h3><div><p>Arranca al iniciar sesión, se levanta solo si se cae y compila el icono de la barra de menú.</p><pre>macos/install.sh</pre></div></div>
+      <div class="step"><span class="n">3</span><h3>Verlo en la tablet</h3><div><p>Con Tailscale en el Mac y en la tablet, abre <code>https://&lt;tu-mac&gt;.&lt;tu-tailnet&gt;.ts.net</code>.</p><pre>tailscale serve --bg 4317</pre></div></div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">Dashboard 0.6.1 · panel personal de Codex y Claude Code · <a href="https://github.com/jfmargar/dashboard">Código en GitHub</a> con licencia <a href="https://github.com/jfmargar/dashboard/blob/main/LICENSE">MIT</a>. Gráficos de <a href="https://github.com/pablodelucca/pixel-agents">pixel-agents</a> (MIT) y personajes <a href="https://jik-a-4.itch.io/metrocity-free-topdown-character-pack">MetroCity de JIK-A-4</a> (CC0).</footer>
+</body>
+</html>

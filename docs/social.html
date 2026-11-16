@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Dashboard · imagen social</title>
+<!-- Fuente de docs/images/social.png (1280×640), la vista previa de GitHub y de los enlaces.
+     Se regenera con docs/capturas.sh, junto con las capturas -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=IBM+Plex+Sans:wght@500&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  :root { --night: #12141d; --line: #333a52; --paper: #ebe7dc; --dim: #9da1b4; --yours: #f2c14e; --working: #6cc788; --claude: #d97757; --codex: #5b9cf0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1280px; height: 640px; overflow: hidden; background: var(--night); color: var(--paper); }
+  body { display: grid; grid-template-columns: 480px 1fr; gap: 48px; align-items: center; padding: 0 0 0 64px; font-family: "IBM Plex Sans", sans-serif; }
+  .text { display: flex; flex-direction: column; gap: 26px; }
+  .brand { display: flex; align-items: center; gap: 20px; }
+  .brand img { width: 80px; height: 80px; }
+  h1 { margin: 0; font-family: "Silkscreen", monospace; font-weight: 400; font-size: 48px; line-height: 1; }
+  h1 span { color: var(--yours); }
+  p { margin: 0; font-size: 27px; line-height: 1.35; }
+  .tags { display: flex; flex-wrap: wrap; gap: 10px; font-family: "IBM Plex Mono", monospace; font-size: 17px; }
+  .tags span { padding: 4px 10px; border: 2px solid var(--line); color: var(--dim); }
+  .tags .claude { color: var(--claude); border-color: var(--claude); }
+  .tags .codex { color: var(--codex); border-color: var(--codex); }
+  .shot { height: 640px; overflow: hidden; display: flex; align-items: center; }
+  .shot img { display: block; height: 560px; width: auto; border: 3px solid var(--line); border-right: 0; }
+</style>
+</head>
+<body>
+  <div class="text">
+    <div class="brand"><img src="images/icon.png" alt=""><h1>Dash<span>board</span></h1></div>
+    <p>Tus sesiones de Codex y Claude Code, en una oficina pixel art. Mira quién te espera y contesta desde la tablet.</p>
+    <div class="tags"><span class="claude">Claude Code</span><span class="codex">Codex</span><span>Node 24</span><span>sin dependencias</span><span>macOS</span></div>
+  </div>
+  <div class="shot"><img src="images/oficina.webp" alt=""></div>
+</body>
+</html>
