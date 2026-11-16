@@ -6,9 +6,9 @@
 
 <p align="center"><b>Node 24, sin dependencias</b> · <b>solo en tu Mac y tu tailnet</b> · <b>app de barra de menú incluida</b></p>
 
-![Vista Oficina en un iPad apaisado: dos puestos trabajando, dos esperando con «!», una coordinadora con su delegada y el pasillo de salas sin uso](docs/images/oficina.webp)
+[![Vídeo de 40 segundos: la oficina en movimiento, una sesión nueva que entra, otra que se pone a trabajar y otra que termina; después la ficha, Misiones, la Bandeja y el panel en el móvil](docs/video/dashboard.gif)](https://jfmargar.github.io/dashboard/video/dashboard.mp4)
 
-<sub>Todas las capturas son de una instancia de demostración con proyectos y sesiones inventados.</sub>
+<sub>Vídeo de 40 segundos ([MP4](https://jfmargar.github.io/dashboard/video/dashboard.mp4)). Todas las imágenes son de una instancia de demostración con proyectos y sesiones inventados.</sub>
 
 > **In English.** Dashboard is a local, dependency-free Node 24 web panel that turns the Codex and Claude Code sessions on your Mac into a pixel-art office. Each project is a desk and each session a character: you see at a glance who is working, who is waiting for you and who is done, on the Mac or on a tablet or phone over your Tailscale tailnet. It is an overview to keep track of your agents when you are away from the computer, not a replacement for Codex in the ChatGPT app or Claude Remote Control: you keep working in those apps, each session links to its own app, and replies, approvals or stops can also be sent from the panel when it is handy. It reads the apps' own logs read-only, listens on `127.0.0.1` only, and every command is reviewed before it is sent. It also has a mission board for coordinator and delegate sessions, an inbox that turns dictated notes into issues or new sessions, and a Swift menu-bar app. The interface is in Spanish.
 
@@ -58,15 +58,6 @@ Arriba quedan siempre la hora, los contadores y el uso de las ventanas de 5 hora
 
 El detalle de cada vista, las órdenes, el dictado y las variables está en la [guía de uso](docs/guia.md).
 
-## App de barra de menú
-
-`macos/install.sh` deja el panel como servicio del Mac y compila `Dashboard.app`, una app pequeña en Swift que vive en la barra superior:
-
-- Junto al icono enseña cuántas sesiones trabajan y cuántas te esperan («4·2»), y se apaga si el panel está parado.
-- Arranca, para y reinicia el servicio sin abrir la terminal, y abre el registro (`~/Library/Logs/Dashboard.log`).
-- Copia la dirección de Tailscale para abrir el panel en la tablet.
-- No tiene icono en el Dock y cerrarla no para el panel. `macos/uninstall.sh` lo quita todo.
-
 ## Requisitos
 
 Solo son imprescindibles macOS y Node. Cada pieza más enciende una parte del panel; sin ella, esa parte no aparece y el resto sigue funcionando.
@@ -85,30 +76,53 @@ Solo son imprescindibles macOS y Node. Cada pieza más enciende una parte del pa
 
 ## Instalación
 
+Necesitas macOS y Node.js 24 o superior (`brew install node`). No hay dependencias de npm que instalar. Lo demás de [Requisitos](#requisitos) es opcional y se puede añadir después.
+
 ```bash
 git clone https://github.com/jfmargar/dashboard.git
 cd dashboard
+```
+
+Después elige cómo quieres tenerlo.
+
+### Opción 1: con npm
+
+```bash
 npm start
 ```
 
-Abre `http://localhost:4317`. Con `npm run dev` se reinicia al cambiar el código.
+Abre `http://localhost:4317`. El panel funciona mientras la terminal siga abierta. Con `npm run dev` se reinicia solo al cambiar el código.
 
-Para que arranque solo al iniciar sesión, se levante si se cae y tenga icono en la barra de menú:
+### Opción 2: como servicio, con la app de la barra de menú
+
+Para tenerlo siempre en marcha sin abrir la terminal (necesita las Command Line Tools de Xcode, `xcode-select --install`):
 
 ```bash
 macos/install.sh
 ```
 
+El script hace dos cosas:
+
+1. **Instala el servicio.** El panel arranca al iniciar sesión y se vuelve a levantar si se cae. El registro va a `~/Library/Logs/Dashboard.log`.
+2. **Compila y abre `Dashboard.app`** en `~/Applications`. Es una app pequeña en Swift que vive en la barra superior, sin icono en el Dock:
+   - Junto al icono enseña cuántas sesiones trabajan y cuántas te esperan («4·2»), y se apaga si el panel está parado.
+   - Abre el panel, arranca, para y reinicia el servicio, y abre el registro.
+   - Copia la dirección de Tailscale para abrir el panel en la tablet.
+   - Con «Mostrar el icono al iniciar sesión» aparece sola en cada arranque. Cerrarla no para el panel.
+
+Vuelve a ejecutar `macos/install.sh` después de actualizar el repositorio (`git pull`). `macos/uninstall.sh` quita el servicio y la app.
+
 Con el servicio en marcha, el puerto 4317 está ocupado: para desarrollar usa otro (`PORT=4319 npm run dev`).
 
-Para verlo en la tablet, con Tailscale en el Mac y en la tablet:
+### En la tablet o el móvil
+
+Con Tailscale en el Mac y en el otro equipo, publica el panel en tu tailnet:
 
 ```bash
 tailscale serve --bg 4317
 ```
 
 y abre `https://<nombre-del-mac>.<tu-tailnet>.ts.net`.
-
 
 ## Configuración
 
