@@ -2,7 +2,7 @@
 
 <h1 align="center">Dashboard</h1>
 
-<p align="center">Una oficina en pixel art donde cada sesión de Codex y Claude Code de tu Mac es un personaje.<br>Ves quién trabaja, quién te espera y le contestas desde la tablet o el móvil.</p>
+<p align="center">Todas tus sesiones de Claude Code y Codex, de un vistazo.<br>Una oficina en pixel art donde cada sesión de tu Mac es un personaje: quién trabaja, quién te espera y quién ha terminado.</p>
 
 <p align="center"><b>Node 24, sin dependencias</b> · <b>solo en tu Mac y tu tailnet</b> · <b>app de barra de menú incluida</b></p>
 
@@ -10,7 +10,7 @@
 
 <sub>Todas las capturas son de una instancia de demostración con proyectos y sesiones inventados.</sub>
 
-> **In English.** Dashboard is a local, dependency-free Node 24 web panel that turns the Codex and Claude Code sessions on your Mac into a pixel-art office. Each project is a desk and each session a character: you see at a glance who is working, who is waiting for you and who is done, and you can answer, approve or stop them from a tablet or phone over your Tailscale tailnet. It reads the apps' own logs read-only, listens on `127.0.0.1` only, and every command is reviewed before it is sent. It also has a mission board for coordinator and delegate sessions, an inbox that turns dictated notes into issues or new sessions, and a Swift menu-bar app. The interface is in Spanish.
+> **In English.** Dashboard is a local, dependency-free Node 24 web panel that turns the Codex and Claude Code sessions on your Mac into a pixel-art office. Each project is a desk and each session a character: you see at a glance who is working, who is waiting for you and who is done, on the Mac or on a tablet or phone over your Tailscale tailnet. It is an overview to keep track of your agents when you are away from the computer, not a replacement for Codex in the ChatGPT app or Claude Remote Control: you keep working in those apps, each session links to its own app, and replies, approvals or stops can also be sent from the panel when it is handy. It reads the apps' own logs read-only, listens on `127.0.0.1` only, and every command is reviewed before it is sent. It also has a mission board for coordinator and delegate sessions, an inbox that turns dictated notes into issues or new sessions, and a Swift menu-bar app. The interface is in Spanish.
 
 ## Qué es
 
@@ -23,7 +23,9 @@ Con varias sesiones abiertas entre Codex, Claude Code y sus subagentes es fácil
 | **Terminada** | Cerró el turno sin pedirte nada | Suelta unas chispas y se va a la zona común |
 | **¿Atascada?** | 10 minutos trabajando sin escribir nada | Un «?» rojo parpadea sobre su cabeza |
 
-Al tocar un personaje se abre su ficha: el último encargo, la respuesta en curso en vivo y el historial. Desde ahí puedes contestar, dar indicaciones sobre la marcha, aprobar o parar, escribiendo o dictando. El Mac continúa la sesión en segundo plano con el CLI oficial de su agente.
+Al tocar un personaje se abre su ficha: el último encargo, la respuesta en curso en vivo y el historial.
+
+Con las sesiones se trabaja en Codex y en Claude, como siempre. Dashboard no pretende sustituir a Codex en la app de ChatGPT ni a Remote Control de Claude: es una ayuda para tener la visión global sin estar delante del ordenador. Cuando una sesión te necesita, la ficha la abre en su app (Remote Control para las de la app de Claude; la app de Codex en el Mac o ChatGPT en el móvil). Si te viene mejor, también puedes contestar, aprobar o parar desde el propio panel, escribiendo o dictando. El Mac continúa la sesión en segundo plano con el CLI oficial de su agente.
 
 ## Tres vistas
 
