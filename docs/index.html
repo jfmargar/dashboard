@@ -69,6 +69,7 @@ section + section { border-top: 1px solid var(--line); }
 /* Capturas */
 .shot { margin: 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .shot img { display: block; width: 100%; height: auto; border: 2px solid var(--line); background: var(--floor); }
+.shot video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 2px solid var(--line); background: var(--night, #12141d); }
 .shot figcaption { font-size: 13.5px; color: var(--dim); }
 .demo-note { font-size: 12.5px; color: var(--dim); font-family: var(--mono); }
 .gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
@@ -201,6 +202,20 @@ footer { padding-block: 32px 48px; color: var(--dim); font-size: 13px; border-to
 </header>
 
 <main>
+  <section class="wrap stack" style="gap:20px">
+    <div class="prose stack">
+      <span class="eyebrow">En 40 segundos</span>
+      <h2>La oficina en movimiento</h2>
+      <p>Una sesión nueva entra por la puerta, otra se pone a trabajar cuando le contestas y otra termina y se va al sofá. Después, la ficha, Misiones, la Bandeja y el panel en el móvil.</p>
+    </div>
+    <figure class="shot">
+      <video class="video" controls muted playsinline preload="metadata" poster="video/poster.webp" width="1920" height="1080" aria-label="Vídeo de presentación de Dashboard">
+        <source src="video/dashboard.mp4" type="video/mp4">
+        <a href="video/dashboard.mp4">Descargar el vídeo (MP4, 5 MB)</a>
+      </video>
+    </figure>
+  </section>
+
   <section class="wrap stack" style="gap:28px">
     <div class="prose stack">
       <span class="eyebrow">Qué resuelve</span>
